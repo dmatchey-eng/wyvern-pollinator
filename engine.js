@@ -1,6 +1,8 @@
 // engine.js
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { STANDARD_BASE_CEILING, DOUBLED_WORKING_CEILING } from './config.js';
-import { GeospatialFileAuditor } from './security.js';
+import { GeospatialFileAuditor, SatelliteCryptoValidator } from './security.js';
 import { WyvernNFTBlockchainBackbone } from './blockchain.js';
 import { FractalTopographyAnalyzer, InverseSolarScheduler, DroneHardwareController } from './subsystems.js';
 import { DynamicNFTGraphicEngine, LocalHTMLGalleryExporter, HaruhiDataOutputMonitor } from './analytics.js';
@@ -15,8 +17,8 @@ export class WyvernSerializedEngine {
     }
 
     processSerializedSimulation(rasterImage, targetLat, targetLon, season, currentBudget = null, droneBattery = 100.0) {
-        // Hard baseline validation to stop undefined array injection crashes
-        if (!rasterImage || !rasterImage.length) {
+        // Hard perimeter array checks to prevent undefined array crashes
+        if (!rasterImage || !rasterImage.length || !rasterImage[0]) {
             console.error("🚨 MATRIX REJECTION: Received invalid or undefined raster input.");
             return false;
         }
@@ -76,7 +78,6 @@ export class WyvernSerializedEngine {
                 if (kernelSlice.some(row => row.includes(4))) {
                     console.log(`\n[!] SENSOR INTERCEPT: Cloud canopy layer at (${coordDisplay}). Cleansing raster...`);
                     const cleansedRaster = rasterImage.map(row => row.map(pixel => pixel === 4 ? 5 : pixel));
-                    // Fixed recursive forward-parameter passing logic block
                     return this.processSerializedSimulation(cleansedRaster, targetLat, targetLon, season, STANDARD_BASE_CEILING, droneBattery);
                 }
 
@@ -93,22 +94,19 @@ export class WyvernSerializedEngine {
     }
 }
 
-// Fixed ES module entry point checker for Node.js 24
-const currentFilePath = fileURLToPath(import.meta.url);
-const executionFilePath = process.argv[1];
+// Robust, cross-platform entry point execution verification for Node JS 24 ES Modules
+const currentScriptPath = fileURLToPath(import.meta.url);
+const executedScriptPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 
-if (currentFilePath === executionFilePath || (executionFilePath && executionFilePath.endsWith('engine.js'))) {
-    // Pristine 5x5 matrix layout grid with no empty hanging lines or parameters
+if (currentScriptPath === executedScriptPath || executedScriptPath.endsWith('engine.js')) {
+    // Solid 5x5 data matrix structure
     const SIMULATED_LANDSCAPE = [,
  ,
  ,
  ,
-        [2, 3, 1, 2, 3]
+        [1, 2, 1, 2, 3]
     ];
     
     const engine = new WyvernSerializedEngine();
     engine.processSerializedSimulation(SIMULATED_LANDSCAPE, 29.4241, -98.4936, "WINTER");
 }
-
-// Dynamic ESM helper function implementation
-import { fileURLToPath } from 'node:url';
