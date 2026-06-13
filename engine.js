@@ -15,6 +15,12 @@ export class WyvernSerializedEngine {
     }
 
     processSerializedSimulation(rasterImage, targetLat, targetLon, season, currentBudget = null, droneBattery = 100.0) {
+        // Hard baseline validation to stop undefined array injection crashes
+        if (!rasterImage || !rasterImage.length) {
+            console.error("🚨 MATRIX REJECTION: Received invalid or undefined raster input.");
+            return false;
+        }
+
         const rows = rasterImage.length;
         const cols = rasterImage[0].length;
         const kernelSize = 3;
@@ -22,7 +28,6 @@ export class WyvernSerializedEngine {
         
         const dataMonitor = new HaruhiDataOutputMonitor();
         
-        // Expanded 12-team allocation selection pool array
         const teamsPool = [
             "ALPHA_WYVERN", "BETA_APIS", "GAMMA_GRYPHON", "DELTA_AQUILA",
             "EPSILON_VESPA", "ZETA_PHOENIX", "ETA_FORMICA", "THETA_ANZU",
@@ -30,11 +35,11 @@ export class WyvernSerializedEngine {
         ];
         
         if (currentBudget === null) {
-            currentBudget = DOUBLED_WORKING_CEILING; // Initializes at 52 units
+            currentBudget = DOUBLED_WORKING_CEILING; // 52 units
         }
         
         console.log(`\n[*] Activating Node.js 24 12-Team Sequential Pipeline. Active Budget: ${currentBudget} Units`);
-        console.log("-".repeat(150));
+        console.log("-".repeat(120));
 
         for (let r = 0; r <= rows - kernelSize; r++) {
             for (let c = 0; c <= cols - kernelSize; c++) {
@@ -53,7 +58,6 @@ export class WyvernSerializedEngine {
                 const liveFileSignature = this.fileAuditor.computeLocationSaltedSignature(offsetLat, offsetLon);
                 const dataDiagnosticLog = dataMonitor.updateAndCheckCoverage(kernelSlice);
                 
-                // Rotates index through the 12 active teams
                 const activeTeam = teamsPool[stepCount % teamsPool.length];
                 
                 const [newBattery, priorityScore, powerLog] = this.inverseScheduler.evaluateInversePriorityDynamics(
@@ -61,24 +65,22 @@ export class WyvernSerializedEngine {
                 );
                 droneBattery = newBattery;
 
-                // Generates distinguishable token format: [TEAM]-[SEASON]-[EVENT]-[INDEX]
                 const serialTokenUid = this.graphicRenderer.generateSerializedUid(season, eventStatus, activeTeam, stepCount);
                 const tokenGraphicUri = this.graphicRenderer.renderTokenGraphic(
                     serialTokenUid, activeTeam, season, eventStatus, priorityScore
-                )
+                );
 
                 const mintedNft = this.ledgerBackbone.mintPriorityNft(stepCount, coordDisplay, priorityScore, droneBattery, activeTeam, tokenGraphicUri);
                 this.ledgerBackbone.appendSecureBlock(stepCount, coordDisplay, kernelSlice.flat(), { team: activeTeam }, mintedNft);
 
-if (kernelSlice.some(row => row.includes(4))) {
-    console.log(`\n[!] SENSOR INTERCEPT: Cloud canopy layer at (${coordDisplay}). Cleansing raster...`);
-    const cleansedRaster = rasterImage.map(row => row.map(pixel => pixel === 4 ? 5 : pixel));
-    
-    // ➔ FIX: Pass 'cleansedRaster' as the first parameter to the recursive loop
-    return this.processSerializedSimulation(cleansedRaster, targetLat, targetLon, season, STANDARD_BASE_CEILING, droneBattery);
-}
+                if (kernelSlice.some(row => row.includes(4))) {
+                    console.log(`\n[!] SENSOR INTERCEPT: Cloud canopy layer at (${coordDisplay}). Cleansing raster...`);
+                    const cleansedRaster = rasterImage.map(row => row.map(pixel => pixel === 4 ? 5 : pixel));
+                    // Fixed recursive forward-parameter passing logic block
+                    return this.processSerializedSimulation(cleansedRaster, targetLat, targetLon, season, STANDARD_BASE_CEILING, droneBattery);
+                }
 
-                console.log(`Step [${String(stepCount).padStart(2, '0')}] Node: (${coordDisplay}) | PV Solar: ${solarIrradiance.toFixed(1)} W/m² | Batt: ${droneBattery.toFixed(1)}% | Serial UID: ${serialTokenUid.padEnd(20, ' ')} | Status: ${dataDiagnosticLog}`);
+                console.log(`Step [${String(stepCount).padStart(2, '0')}] Node: (${coordDisplay}) | Solar: ${solarIrradiance.toFixed(1)} W/m² | Batt: ${droneBattery.toFixed(1)}% | Serial UID: ${serialTokenUid}`);
                 
                 currentBudget--;
                 stepCount++;
@@ -91,13 +93,22 @@ if (kernelSlice.some(row => row.includes(4))) {
     }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Fixed ES module entry point checker for Node.js 24
+const currentFilePath = fileURLToPath(import.meta.url);
+const executionFilePath = process.argv[1];
+
+if (currentFilePath === executionFilePath || (executionFilePath && executionFilePath.endsWith('engine.js'))) {
+    // Pristine 5x5 matrix layout grid with no empty hanging lines or parameters
     const SIMULATED_LANDSCAPE = [,
  ,
  ,
  ,
         [2, 3, 1, 2, 3]
     ];
+    
     const engine = new WyvernSerializedEngine();
     engine.processSerializedSimulation(SIMULATED_LANDSCAPE, 29.4241, -98.4936, "WINTER");
 }
+
+// Dynamic ESM helper function implementation
+import { fileURLToPath } from 'node:url';
