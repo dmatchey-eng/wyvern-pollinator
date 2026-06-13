@@ -11,21 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Check out your repository code into the runner workspace
     - name: Check out repository code
       uses: actions/checkout@v4
 
-    # Setup the exact current stable release node container environment
+    # Step 2: Set up an isolated Node.js 24 container environment
+    # Automated caching is locked to npm to look for package-lock.json automatically
     - name: Configure Node.js 24 Runtime Environment
       uses: actions/setup-node@v4
       with:
-        node-version: '24' 
+        node-version: '24'
+        cache: 'npm'
 
-    # If you use external packages (like mathjs), this restores your package locks
+    # Step 3: Run clean installer sequence utilizing the lockfile
     - name: Install Project Workspace Dependencies
-      run: |
-        if [ -f package.json ]; then npm ci; fi
+      run: npm ci
 
-    # Execute the primary script engine module using Node.js
+    # Step 4: Execute the primary script engine test sweep
     - name: Execute Strict Sequential Matrix Telemetry Test Run
-      run: |
-        node engine.js
+      run: node engine.js
