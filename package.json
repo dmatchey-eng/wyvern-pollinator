@@ -1,0 +1,7 @@
+{
+  "name": "wyvern-telemetry-engine-node24",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "High-integrity cyber-physical geospatial scanning and analysis engine for Node.js 24",
+  "main": "engine.js"
+}
