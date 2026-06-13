@@ -1,6 +1,5 @@
-name: Wyvern Telemetry Scanner Engine Test Run
+name: Wyvern Telemetry Scanner Engine Node.js 24 Test Run
 
-# Trigger this workflow every time code is pushed or a pull request is submitted to main
 on:
   push:
     branches: [ main, master ]
@@ -8,29 +7,25 @@ on:
     branches: [ main, master ]
 
 jobs:
-  execute-test-run:
-    # Run the test container on the latest open-source Ubuntu Linux image
+  execute-node-test-run:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Check out your repository code into the runner workspace
     - name: Check out repository code
       uses: actions/checkout@v4
 
-    # Step 2: Set up an isolated Python execution environment
-    - name: Configure Python Runtime Environment
-      uses: actions/setup-python@v5
+    # Setup the exact current stable release node container environment
+    - name: Configure Node.js 24 Runtime Environment
+      uses: actions/setup-node@v4
       with:
-        python-version: '3.11' # Locks runtime environment parameters
+        node-version: '24' 
 
-    # Step 3: Install core analytical and array processing dependencies
-    - name: Install System Dependencies
+    # If you use external packages (like mathjs), this restores your package locks
+    - name: Install Project Workspace Dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install numpy scipy
+        if [ -f package.json ]; then npm ci; fi
 
-    # Step 4: Execute a live simulation test sweep
-    # This runs the main block inside engine.py to verify your budget scaling logic
+    # Execute the primary script engine module using Node.js
     - name: Execute Strict Sequential Matrix Telemetry Test Run
       run: |
-        python engine.py
+        node engine.js
