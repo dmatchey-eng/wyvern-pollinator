@@ -33,12 +33,13 @@ export const SYSTEM_CONDITIONS = [
     "Condition 21: Cross-Network Consortium Token Transfer Verification Failure (P2P Sharing)",
     "Condition 22: High-Registry Event Remembrance & Anomalous State Synchronization (System Sync)",
     "Condition 23: SVG Graphic Rendering Failure and Layer Overlay Corruption (Dynamic Art Generation)",
-    "Condition 24: Serialized Token Naming Index Mismatch & Metadata Corruption Fault (Traceable Timeline)"
+    "Condition 24: Serialized Token Naming Index Mismatch & Metadata Corruption Fault (Traceable Timeline)",
+    "Condition 25: Consortium Cluster Decentralization & Team Sync Timeout Fault (12-Team Scale Lock)"
 ];
 
-// Budget Math: 1 + 24 Conditions = 25 Base Units
+// Budget Math: 1 + 25 Conditions = 26 Base Units
 export const STANDARD_BASE_CEILING = 1 + SYSTEM_CONDITIONS.length;
 
-// Working Conditions Modifier: Double the standard base (25 * 2 = 50 Units)
+// Working Conditions Modifier: Double the standard base (26 * 2 = 52 Units)
 export const DOUBLED_WORKING_CEILING = STANDARD_BASE_CEILING * 2;
 export const STABILIZATION_THRESHOLD = 0.05;
