@@ -10,16 +10,30 @@ export class DynamicNFTGraphicEngine {
             "AUTUMN": { bg1: "#f39c12", bg2: "#d35400", accent: "#e67e22", code: "ATMN" },
             "WINTER": { bg1: "#2c3e50", bg2: "#3498db", accent: "#ecf0f1", code: "WNTR" }
         };
+        
+        // Expanded 12-team biological and mythological creature symbols
         this.teamEmblems = {
-            "ALPHA_WYVERN": "🐉", "BETA_APIS": "🐝", "GAMMA_GRYPHON": "🦅", "DELTA_AQUILA": "🦅"
+            "ALPHA_WYVERN": "🐉", "BETA_APIS": "🐝", "GAMMA_GRYPHON": "🦅", "DELTA_AQUILA": "🦅",
+            "EPSILON_VESPA": "🐝", "ZETA_PHOENIX": "🔥", "ETA_FORMICA": "🐜", "THETA_ANZU": "🌀",
+            "IOTA_PANTHERA": "🐆", "KAPPA_KRAKEN": "🦑", "LAMBDA_MANTIS": "🦗", "MU_PEGASUS": "🐎"
+        };
+
+        // Standardized 3-letter log tracking index headers for clean tracking
+        this.logIndices = {
+            "ALPHA_WYVERN": "WYV", "BETA_APIS": "APS", "GAMMA_GRYPHON": "GRY", "DELTA_AQUILA": "AQL",
+            "EPSILON_VESPA": "VSP", "ZETA_PHOENIX": "PHX", "ETA_FORMICA": "FRM", "THETA_ANZU": "ANZ",
+            "IOTA_PANTHERA": "PTH", "KAPPA_KRAKEN": "KRK", "LAMBDA_MANTIS": "MNT", "MU_PEGASUS": "PGS"
         };
     }
 
-    generateSerializedUid(season, eventStatus, index) {
+    generateSerializedUid(season, eventStatus, teamKey, index) {
         const sTarget = season.toUpperCase();
         const seasonCode = this.seasonalPalettes[sTarget] ? this.seasonalPalettes[sTarget].code : "UNKN";
+        const teamCode = this.logIndices[teamKey.toUpperCase()] || "DRN";
         const eventCode = eventStatus.includes("ECLIPSE") ? "ECLP" : (eventStatus.includes("WEATHER") ? "VRTX" : "NOMN");
-        return `WYV-${seasonCode}-${eventCode}-${String(index).padStart(3, '0')}`;
+        
+        // Output trace format: [TEAM]-[SEASON]-[EVENT]-[INDEX]
+        return `${teamCode}-${seasonCode}-${eventCode}-${String(index).padStart(3, '0')}`;
     }
 
     renderTokenGraphic(serialUid, team, season, eventStatus, priority) {
@@ -44,11 +58,11 @@ export class DynamicNFTGraphicEngine {
             <text x="150" y="165" font-size="75" text-anchor="middle">${emblem}</text>
             <text x="150" y="45" font-family="monospace" font-size="13" fill="${palette.accent}" font-weight="bold" text-anchor="middle">${team}</text>
             <text x="150" y="220" font-family="monospace" font-size="13" fill="white" font-weight="bold" text-anchor="middle">${serialUid}</text>
+            <text x="150" y="235" font-family="monospace" font-size="10" fill="white" opacity="0.7" text-anchor="middle">PRIORITY SCORE: ${priority.toFixed(2)}</text>
             ${sealLayer}
         </svg>`;
 
-        const b64 = Buffer.from(svgRaw).toString('base64');
-        return `data:image/svg+xml;base64,${b64}`;
+        return `data:image/svg+xml;base64,${Buffer.from(svgRaw).toString('base64')}`;
     }
 }
 
@@ -59,11 +73,15 @@ export class LocalHTMLGalleryExporter {
             if (block.index > 0 && block.nft) {
                 const nft = block.nft;
                 htmlCards += `
-                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;text-align:center;">
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;text-align:center;box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5);">
                     <img src="${nft.graphicUri}" style="width:100%;border-radius:6px;"/>
-                    <p style="color:#38bdf8;font-weight:bold;margin:10px 0 5px 0;">${nft.tokenId}</p>
-                    <p style="font-size:11px;color:#94a3b8;margin:0;">Team: ${nft.ownerTeam}</p>
-                    <p style="font-size:10px;color:#64748b;margin:2px 0 0 0;">GPS: ${nft.attributes.geospatialNode}</p>
+                    <p style="color:#38bdf8;font-weight:bold;margin:10px 0 5px 0;font-size:14px;">${nft.tokenId}</p>
+                    <p style="font-size:12px;color:#e2e8f0;margin:0;font-weight:bold;">${nft.ownerTeam}</p>
+                    <div style="font-size:10px;color:#64748b;text-align:left;background:#0f172a;padding:6px;border-radius:4px;margin-top:8px;">
+                        <strong>Node Pin:</strong> ${nft.attributes.geospatialNode}<br>
+                        <strong>P_solar:</strong> ${nft.attributes.priorityCoefficient}<br>
+                        <strong>Charge:</strong> ${nft.attributes.stateOfChargePct}%
+                    </div>
                 </div>`;
             }
         });
@@ -71,40 +89,31 @@ export class LocalHTMLGalleryExporter {
         const htmlFull = `<!DOCTYPE html><html>
         <head><title>Wyvern Swarm Portfolio</title></head>
         <body style="background:#0f172a;color:#fff;font-family:monospace;padding:30px;">
-            <h2 style="text-align:center;color:#38bdf8;">🛰️ WYVERN CONSORTIUM: IMMUTABLE NODE GALLERY</h2>
+            <h2 style="text-align:center;color:#38bdf8;border-bottom:2px solid #334155;padding-bottom:12px;">🛰️ WYVERN CONSORTIUM: 12-TEAM LEDGER NFT ARCHIVE</h2>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;margin-top:30px;">
                 ${htmlCards}
             </div>
         </body></html>`;
 
         fs.writeFileSync(filename, htmlFull, 'utf-8');
-        console.log(`\n[🎉 HTML GALLERY EXPORTED] Output compiled safely to: ${path.resolve(filename)}`);
+        console.log(`\n[🎉 HTML GALLERY GENERATED] Output path: ${path.resolve(filename)}`);
     }
 }
 
 export class HaruhiDataOutputMonitor {
     constructor() {
         this.observedHistory = "";
-        this.capturedPerms = new Set();
-        // Base targets collection sequence
         this.expectedPerms = new Set(["123", "132", "213", "231", "312", "321"]);
+        this.capturedPerms = new Set();
     }
-
     updateAndCheckCoverage(kernelSlice) {
         const flatChars = kernelSlice.flat().filter(p => ['1', '2', '3'].includes(String(p)));
         this.observedHistory += flatChars.join("");
-
-        if (this.observedHistory.length > 50) {
-            this.observedHistory = this.observedHistory.slice(-50);
-        }
-
+        if (this.observedHistory.length > 50) this.observedHistory = this.observedHistory.slice(-50);
         for (let i = 0; i < this.observedHistory.length - 2; i++) {
             const windowStr = this.observedHistory.slice(i, i + 3);
-            if (this.expectedPerms.has(windowStr)) {
-                this.capturedPerms.add(windowStr);
-            }
+            if (this.expectedPerms.has(windowStr)) this.capturedPerms.add(windowStr);
         }
-        const pct = (this.capturedPerms.size / this.expectedPerms.size) * 100;
-        return `📊 DATA: ${pct.toFixed(0)}%`;
+        return `📊 DATA: ${((this.capturedPerms.size / this.expectedPerms.size) * 100).toFixed(0)}%`;
     }
 }
