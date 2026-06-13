@@ -70,10 +70,13 @@ export class WyvernSerializedEngine {
                 const mintedNft = this.ledgerBackbone.mintPriorityNft(stepCount, coordDisplay, priorityScore, droneBattery, activeTeam, tokenGraphicUri);
                 this.ledgerBackbone.appendSecureBlock(stepCount, coordDisplay, kernelSlice.flat(), { team: activeTeam }, mintedNft);
 
-                if (kernelSlice.some(row => row.includes(4))) {
-                    const cleansedRaster = rasterImage.map(row => row.map(pixel => pixel === 4 ? 5 : pixel));
-                    return this.process_serialized_simulation(cleansedRaster, targetLat, targetLon, season, STANDARD_BASE_CEILING, droneBattery);
-                }
+if (kernelSlice.some(row => row.includes(4))) {
+    console.log(`\n[!] SENSOR INTERCEPT: Cloud canopy layer at (${coordDisplay}). Cleansing raster...`);
+    const cleansedRaster = rasterImage.map(row => row.map(pixel => pixel === 4 ? 5 : pixel));
+    
+    // ➔ FIX: Pass 'cleansedRaster' as the first parameter to the recursive loop
+    return this.processSerializedSimulation(cleansedRaster, targetLat, targetLon, season, STANDARD_BASE_CEILING, droneBattery);
+}
 
                 console.log(`Step [${String(stepCount).padStart(2, '0')}] Node: (${coordDisplay}) | PV Solar: ${solarIrradiance.toFixed(1)} W/m² | Batt: ${droneBattery.toFixed(1)}% | Serial UID: ${serialTokenUid.padEnd(20, ' ')} | Status: ${dataDiagnosticLog}`);
                 
